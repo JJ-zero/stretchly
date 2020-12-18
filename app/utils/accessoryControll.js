@@ -9,6 +9,7 @@ class PhilipsHueController {
   }
 
   backupState (scene) {
+    log.info('AccessoryControll > Backing up light setting')
     for (const lightId in scene) {
       const light = scene[lightId]
       // console.log(light.id)
@@ -35,9 +36,11 @@ class PhilipsHueController {
     log.info('AccessoryControll > Restoring scene.')
     console.log(this.sceneBackup)
     this.setScene(this.sceneBackup)
+    this.sceneBackup = {}
   }
 
   setScene (scene) {
+    log.info('AccessoryControll > Setting scene')
     for (const lightId in scene) {
       const light = scene[lightId]
       const r = http.request(
@@ -104,6 +107,10 @@ class AccessoryControll {
     } else {
       sceneId = this.defaultBreak
       // log.info('AccessoryControll > Break starts')
+    }
+
+    if (sceneId == null) {
+      return
     }
 
     for (const systemId in this.systems) {

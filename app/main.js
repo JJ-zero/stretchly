@@ -616,6 +616,7 @@ function finishBreak (shouldPlaySound = true) {
 function postponeMicrobreak (shouldPlaySound = false) {
   microbreakWins = breakComplete(shouldPlaySound, microbreakWins)
   breakPlanner.postponeCurrentBreak()
+  accessoryControll.onBreakEnd()
   log.info('Stretchly: postponing Mini Break')
   updateTray()
 }
@@ -623,6 +624,7 @@ function postponeMicrobreak (shouldPlaySound = false) {
 function postponeBreak (shouldPlaySound = false) {
   breakWins = breakComplete(shouldPlaySound, breakWins)
   breakPlanner.postponeCurrentBreak()
+  accessoryControll.onBreakEnd()
   log.info('Stretchly: postponing Long Break')
   updateTray()
 }
