@@ -18,6 +18,7 @@ const BreaksPlanner = require('./breaksPlanner')
 const AppIcon = require('./utils/appIcon')
 const { UntilMorning } = require('./utils/untilMorning')
 const Command = require('./utils/commands')
+const AccessoryControll = require('./utils/accessoryControll')
 
 let microbreakIdeas
 let breakIdeas
@@ -34,6 +35,7 @@ let myStretchlyWindow = null
 let settings
 let pausedForSuspendOrLock = false
 let nextIdea = null
+let accessoryControll
 
 app.setAppUserModelId('net.hovancik.stretchly')
 
@@ -55,6 +57,7 @@ if (!gotTheLock) {
 
 app.on('ready', startProcessWin)
 app.on('ready', loadSettings)
+app.on('ready', loadAccessoryControll)
 app.on('ready', createTrayIcon)
 app.on('ready', startPowerMonitoring)
 app.on('second-instance', runCommand)
@@ -368,6 +371,8 @@ function startMicrobreak () {
     return
   }
 
+  accessoryControll.onBreak(true)
+
   const startTime = Date.now()
   const breakDuration = settings.get('microbreakDuration')
   const strictMode = settings.get('microbreakStrictMode')
@@ -476,6 +481,8 @@ function startBreak () {
     log.warn('Stretchly: Long Break already running, not starting Long Break')
     return
   }
+
+  accessoryControll.onBreak(false)
 
   const startTime = Date.now()
   const breakDuration = settings.get('breakDuration')
@@ -594,6 +601,7 @@ function finishMicrobreak (shouldPlaySound = true) {
   microbreakWins = breakComplete(shouldPlaySound, microbreakWins)
   log.info('Stretchly: finishing Mini Break')
   breakPlanner.nextBreak()
+  accessoryControll.onBreakEnd()
   updateTray()
 }
 
@@ -601,6 +609,7 @@ function finishBreak (shouldPlaySound = true) {
   breakWins = breakComplete(shouldPlaySound, breakWins)
   log.info('Stretchly: finishing Long Break')
   breakPlanner.nextBreak()
+  accessoryControll.onBreakEnd()
   updateTray()
 }
 
@@ -693,6 +702,11 @@ function loadIdeas () {
   }
   breakIdeas = new IdeasLoader(breakIdeasData).ideas()
   microbreakIdeas = new IdeasLoader(microbreakIdeasData).ideas()
+}
+
+function loadAccessoryControll () {
+  log.info('Stretchly: AccessoryControll loaded.')
+  accessoryControll = new AccessoryControll(settings.get('accessory'))
 }
 
 function pauseBreaks (milliseconds) {
