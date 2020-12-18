@@ -20,11 +20,13 @@ class PhilipsHueController {
           res.on('data', (rawData) => {
             const data = JSON.parse(rawData)
             const state = data.state
-            delete state.alert
-            delete state.mode
-            delete state.reachable
-            delete state.colormode
-            this.sceneBackup[lightId] = { id: light.id, state }
+            if (state !== undefined) {
+              delete state.alert
+              delete state.mode
+              delete state.reachable
+              delete state.colormode
+              this.sceneBackup[lightId] = { id: light.id, state }
+            }
           })
         }
       )
@@ -63,7 +65,7 @@ class PhilipsHueController {
         }
       )
       r.on('error', (e) => {
-        log.error(`problem with Hue request: ${e.message}`)
+        log.error(`AccessoryControll > Problem with Hue request: ${e.message}`)
       })
       r.write(JSON.stringify(light.state))
       r.end()
@@ -103,10 +105,10 @@ class AccessoryControll {
     let sceneId = null
     if (mikro) {
       sceneId = this.defaultMiniBreak
-      // log.info('AccessoryControll > Mikrobreak starts')
+      log.info('AccessoryControll > Mikrobreak starts')
     } else {
       sceneId = this.defaultBreak
-      // log.info('AccessoryControll > Break starts')
+      log.info('AccessoryControll > Break starts')
     }
 
     if (sceneId == null) {
