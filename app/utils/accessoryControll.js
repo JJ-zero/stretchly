@@ -5,6 +5,36 @@ class PhilipsHueController {
   constructor (address, key) {
     this.key = key
     this.address = address
+    this.sceneBackup = {}
+  }
+
+  backupState (scene) {
+    for (const lightId in scene) {
+      const light = scene[lightId]
+      // console.log(light.id)
+      http.get(
+        'http://' + this.address + '/api/' + this.key + '/lights/' + light.id,
+        (res) => {
+          res.setEncoding('utf8')
+          res.on('data', (rawData) => {
+            const data = JSON.parse(rawData)
+            const state = data.state
+            delete state.alert
+            delete state.mode
+            delete state.reachable
+            delete state.colormode
+            this.sceneBackup[lightId] = { id: light.id, state }
+          })
+        }
+      )
+    }
+    // console.log(this.sceneBackup)
+  }
+
+  restoreBackupState () {
+    log.info('AccessoryControll > Restoring scene.')
+    console.log(this.sceneBackup)
+    this.setScene(this.sceneBackup)
   }
 
   setScene (scene) {
@@ -18,21 +48,21 @@ class PhilipsHueController {
           method: 'PUT'
         },
         (res) => {
-          console.log(`STATUS: ${res.statusCode}`)
-          console.log(`HEADERS: ${JSON.stringify(res.headers)}`)
+          // console.log(`STATUS: ${res.statusCode}`)
+          // console.log(`HEADERS: ${JSON.stringify(res.headers)}`)
           res.setEncoding('utf8')
           res.on('data', (chunk) => {
-            console.log(`BODY: ${chunk}`)
+            // console.log(`BODY: ${chunk}`)
           })
           res.on('end', () => {
-            console.log('No more data in response.')
+            // console.log('No more data in response.')
           })
         }
       )
       r.on('error', (e) => {
-        console.error(`problem with request: ${e.message}`)
+        log.error(`problem with Hue request: ${e.message}`)
       })
-      r.write(light.state)
+      r.write(JSON.stringify(light.state))
       r.end()
     }
   }
@@ -46,6 +76,8 @@ class AccessoryControll {
     this.systems = {}
     this.loadSystems(settings.systems)
     this.scenes = settings.scenes
+    this.defaultBreak = settings.defaultSceneMiniBreak
+    this.defaultMiniBreak = settings.defaultSceneBreak
   }
 
   loadSystems (systems) {
@@ -65,23 +97,29 @@ class AccessoryControll {
   }
 
   onBreak (mikro) {
+    let sceneId = null
     if (mikro) {
-      log.info('AccessoryControll > Mikrobreak starts')
+      sceneId = this.defaultMiniBreak
+      // log.info('AccessoryControll > Mikrobreak starts')
     } else {
-      log.info('AccessoryControll > Break starts')
+      sceneId = this.defaultBreak
+      // log.info('AccessoryControll > Break starts')
     }
-
-    const sceneId = 'main'
 
     for (const systemId in this.systems) {
       const systemScene = this.scenes[sceneId][systemId]
       const system = this.systems[systemId]
+      system.backupState(systemScene)
       system.setScene(systemScene)
     }
   }
 
   onBreakEnd () {
     log.info('AccessoryControll > Break ends')
+    for (const systemId in this.systems) {
+      const system = this.systems[systemId]
+      system.restoreBackupState()
+    }
   }
 }
 
