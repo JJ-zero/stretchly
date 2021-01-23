@@ -49,7 +49,8 @@
       "monitorIdleTime": "Monitor system idle time (breaks are paused if system is idle).",
       "monitorDnd": "Show breaks even in Do Not Disturb mode",
       "language": "Select language:",
-      "restoreDefaults": "Restore defaults"
+      "restoreDefaults": "Restore defaults",
+      "accessorySetting": "Accessory setting"
     },
     "schedule": {
       "miniBreaks": "Mini Breaks:",
