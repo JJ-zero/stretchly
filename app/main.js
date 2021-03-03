@@ -1059,10 +1059,6 @@ ipcMain.on('restore-defaults', (event) => {
   })
 })
 
-ipcMain.on('accessory-setting', (event) => {
-  console.log('Opening accessory settings')
-})
-
 ipcMain.on('send-settings', function (event) {
   event.sender.send('renderSettings', settingsToSend())
 })

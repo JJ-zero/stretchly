@@ -240,10 +240,6 @@ document.querySelector('.settings > div > button').onclick = (event) => {
   ipcRenderer.send('restore-defaults')
 }
 
-document.querySelector('button[data-i18next="preferences.settings.accessorySetting"]').onclick = (event) => {
-  ipcRenderer.send('accessory-setting')
-}
-
 document.querySelectorAll('.about a').forEach((item) => {
   item.onclick = (event) => {
     event.preventDefault()
